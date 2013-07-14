@@ -1,8 +1,7 @@
 module Anderson where
 
-import Data.Vector (Vector)
-import Data.Vector as V
-
+import Data.Vector (Vector,(!))
+import qualified Data.Vector as V
 
 type Energy = Double
 type Node = Int
@@ -54,3 +53,15 @@ dsoSimp g s = V.imap (\n e -> V.sum (V.map (s !) (neighbors g n))) s
 
 drso :: Adj -> RandomV -> StateV -> StateV
 drso g r s = dso g s +^ V.zipWith (*) r s
+
+drsoIterate :: Adj -> RandomV -> StateV -> Int -> [StateV]
+drsoIterate g r s n = reverse res
+  where
+    res = drsoIterate' g r [s] n
+    drsoIterate' _ _ _ 0 = []
+    drsoIterate' g r ss n = drsoIterate' g r (gsOrth ss (drso g r (head ss)) : ss) (n-1)
+
+drsoDists :: [StateV] -> StateV -> [Double]
+drsoDists [] _ = []
+drsoDists (x:xs) s = sqrt (l2norm2 normal) : drsoDists xs normal
+  where normal = subtractProjOrth s x

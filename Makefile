@@ -1,6 +1,7 @@
 GHCOPTS=
+files = $(wildcard *.hs)
 
 all: anderson
 
-anderson: anderson.hs
-	ghc $(GHCOPTS) -o $@ $<
+anderson: $(files)
+	ghc --make $(GHCOPTS) -o $@ $^
