@@ -1,15 +1,13 @@
 module Gasket where
 
-import Anderson (Adj(Adj),vertices,degree,neighbors)
-
-import Debug.Trace
-
 import Control.Monad
 import Data.List
 import Data.Maybe
 import qualified Data.List as LO
 import qualified Data.Vector as V
-import System.Environment
+-- import System.Environment
+
+import Anderson (Adj(Adj),vertices,degree,neighbors)
 
 gasket 1 = [[True, True] ++ repeat False,
             [True, False] ++ repeat False] 
@@ -98,15 +96,15 @@ graphvizShow label g  = "strict graph G {"
     ++ intercalate "\n" (map gv . V.toList . vertices $ g) ++ "\n}"
   where 
     gv v = concatMap (\w -> "\n  " ++ name v ++ " -- " ++ name w) (V.toList . neighbors g $ v)
-    name v = show v ++ "-" ++ label g
+    name v = show v ++ "-" ++ label v
 
 -- main = do 
 --   n <- liftM (read . head) getArgs
 --   mapM_ (\i -> putStrLn $ showGasket i $ gasket i) [1..n]
 
-main = do 
-  n <- liftM (read . head) getArgs
-  putStrLn . graphvizShowGasket . gasketList $ n
+-- main = do 
+--   n <- liftM (read . head) getArgs
+--   putStrLn . graphvizShowGasket . gasketList $ n
 
 -- main = do 
 --   n <- liftM (read . head) getArgs

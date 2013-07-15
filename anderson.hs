@@ -7,21 +7,31 @@ type Energy = Double
 type Node = Int
 -- newtype StateV = StateV (Vector Energy)
 type StateV = Vector Energy
+
 type RandomV = StateV
 
 data Adj = Adj { offset :: Vector Int,
                  dat :: Vector Node }
   deriving Show
 
+numV :: Adj -> Int
+numV = V.length . offset
+
 vertices :: Adj -> Vector Node
-vertices g = V.enumFromN 0 $ V.length (offset g)
+vertices = V.enumFromN 0 . numV
 
 degree :: Adj -> Node -> Int
-degree g v | v + 1 < V.length (offset g) = offset g ! (v + 1) - offset g ! v
+degree g v | v + 1 < numV g = offset g ! (v + 1) - offset g ! v
 degree g v = V.length (dat g) - offset g ! v
 
 neighbors :: Adj -> Node -> Vector Node
 neighbors g v = V.slice (offset g ! v) (degree g v) (dat g)
+
+delta g n = V.generate (numV g) (\i -> if i == n then 1 else 0)
+
+norandom g = V.replicate (numV g) 0
+
+labelBy s = show . (s V.!)
 
 (+^) = V.zipWith (+)
 neg = V.map negate
