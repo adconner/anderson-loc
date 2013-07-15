@@ -31,7 +31,7 @@ delta g n = V.generate (numV g) (\i -> if i == n then 1 else 0)
 
 norandom g = V.replicate (numV g) 0
 
-labelBy s = show . (s V.!)
+labelBy s = take 4 . show . (s V.!)
 
 (+^) = V.zipWith (+)
 neg = V.map negate
@@ -69,11 +69,12 @@ drso :: Adj -> RandomV -> StateV -> StateV
 drso g r s = dso g s +^ V.zipWith (*) r s
 
 drsoIterate :: Adj -> RandomV -> StateV -> Int -> [StateV]
-drsoIterate g r s n = reverse res
+drsoIterate g r s n = drsoIterate' g r [s] n
   where
-    res = drsoIterate' g r [s] n
     drsoIterate' _ _ _ 0 = []
-    drsoIterate' g r ss n = drsoIterate' g r (gsOrth ss (drso g r (head ss)) : ss) (n-1)
+    drsoIterate' g r ss n = next : drsoIterate' g r (next : ss) (n-1)
+      where 
+        next = gsOrth ss (drso g r (head ss))
 
 drsoDists :: [StateV] -> StateV -> [Double]
 drsoDists [] _ = []

@@ -96,7 +96,7 @@ graphvizShow label g  = "strict graph G {"
     ++ intercalate "\n" (map gv . V.toList . vertices $ g) ++ "\n}"
   where 
     gv v = concatMap (\w -> "\n  " ++ name v ++ " -- " ++ name w) (V.toList . neighbors g $ v)
-    name v = show v ++ "-" ++ label v
+    name v = "\"" ++ show v ++ "(" ++ label v ++ ")\""
 
 -- main = do 
 --   n <- liftM (read . head) getArgs
