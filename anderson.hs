@@ -11,6 +11,10 @@ type RandomV = StateV
 
 data Adj = Adj { offset :: Vector Int,
                  dat :: Vector Node }
+  deriving Show
+
+vertices :: Adj -> Vector Node
+vertices g = V.enumFromN 0 $ V.length (offset g)
 
 degree :: Adj -> Node -> Int
 degree g v | v + 1 < V.length (offset g) = offset g ! (v + 1) - offset g ! v

@@ -1,6 +1,6 @@
 module Gasket where
 
-import Anderson (Adj(Adj))
+import Anderson (Adj(Adj),vertices,degree,neighbors)
 
 import Debug.Trace
 
@@ -74,11 +74,11 @@ compile (Gasket _ _ _ o) = map ai o
     index [] = 0
     index (x:xs) = x + 3 * index xs
 
-graphvizShow g = "strict graph G {" ++ intercalate "\n" (map gv ns) ++ "\n}"
+graphvizShowGasket g = "strict graph G {" ++ intercalate "\n" (map gv ns) ++ "\n}"
   where 
     ns = compile g
     gv (v, r) = concatMap ((++) ("\n  " ++ show v ++ " -- ") . show) r
-  
+
 adjacencylistShow g = intercalate "\n" (map al ns)
   where
     ns = compile g
@@ -94,13 +94,19 @@ gasketAdj g = Adj (V.fromList shape) (V.fromList dat)
     neighbors n = fromJust $ lookup n $ nodes g
     -- bfs (n:ns) vs cur = n : bfs (ns ++ (neighbors n \\ vs)) (n : vs) (cur + 1)
 
+graphvizShow label g  = "strict graph G {" 
+    ++ intercalate "\n" (map gv . V.toList . vertices $ g) ++ "\n}"
+  where 
+    gv v = concatMap (\w -> "\n  " ++ name v ++ " -- " ++ name w) (V.toList . neighbors g $ v)
+    name v = show v ++ "-" ++ label g
+
 -- main = do 
 --   n <- liftM (read . head) getArgs
 --   mapM_ (\i -> putStrLn $ showGasket i $ gasket i) [1..n]
 
 main = do 
   n <- liftM (read . head) getArgs
-  putStrLn . graphvizShow . gasketList $ n
+  putStrLn . graphvizShowGasket . gasketList $ n
 
 -- main = do 
 --   n <- liftM (read . head) getArgs
