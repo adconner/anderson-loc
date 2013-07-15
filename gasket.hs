@@ -1,13 +1,12 @@
-module Gasket where
+module Graph.Gasket where
 
 import Control.Monad
 import Data.List
 import Data.Maybe
 import qualified Data.List as LO
 import qualified Data.Vector as V
--- import System.Environment
 
-import Anderson (Adj(Adj),vertices,degree,neighbors)
+import Graph
 
 gasket 1 = [[True, True] ++ repeat False,
             [True, False] ++ repeat False] 
@@ -24,10 +23,10 @@ showGasket n = intercalate "\n" . take s . map (take s . map r)
         r False = '.'
         s = size n
 
-type Node = [Int]
+type Inode = [Int]
 data Gasket = Gasket {
-    top, left, right :: Node,
-    nodes :: [(Node, [Node])]
+    top, left, right :: Inode,
+    nodes :: [(Inode, [Inode])]
   } deriving Show
 
 freshNodes g n = Gasket {
@@ -91,12 +90,6 @@ gasketAdj g = Adj (V.fromList shape) (V.fromList dat)
     bfs (n:ns) vs = n : bfs (ns ++ ((neighbors n \\ vs) \\ ns)) (n : vs)
     neighbors n = fromJust $ lookup n $ nodes g
     -- bfs (n:ns) vs cur = n : bfs (ns ++ (neighbors n \\ vs)) (n : vs) (cur + 1)
-
-graphvizShow label g  = "strict graph G {" 
-    ++ intercalate "\n" (map gv . V.toList . vertices $ g) ++ "\n}"
-  where 
-    gv v = concatMap (\w -> "\n  " ++ name v ++ " -- " ++ name w) (V.toList . neighbors g $ v)
-    name v = "\"" ++ show v ++ "(" ++ label v ++ ")\""
 
 -- main = do 
 --   n <- liftM (read . head) getArgs

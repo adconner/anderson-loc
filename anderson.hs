@@ -3,35 +3,17 @@ module Anderson where
 import Data.Vector (Vector,(!))
 import qualified Data.Vector as V
 
+import Graph
+
 type Energy = Double
-type Node = Int
 -- newtype StateV = StateV (Vector Energy)
 type StateV = Vector Energy
 
 type RandomV = StateV
 
-data Adj = Adj { offset :: Vector Int,
-                 dat :: Vector Node }
-  deriving Show
-
-numV :: Adj -> Int
-numV = V.length . offset
-
-vertices :: Adj -> Vector Node
-vertices = V.enumFromN 0 . numV
-
-degree :: Adj -> Node -> Int
-degree g v | v + 1 < numV g = offset g ! (v + 1) - offset g ! v
-degree g v = V.length (dat g) - offset g ! v
-
-neighbors :: Adj -> Node -> Vector Node
-neighbors g v = V.slice (offset g ! v) (degree g v) (dat g)
-
 delta g n = V.generate (numV g) (\i -> if i == n then 1 else 0)
 
 norandom g = V.replicate (numV g) 0
-
-labelBy s = take 4 . show . (s V.!)
 
 (+^) = V.zipWith (+)
 neg = V.map negate
@@ -69,7 +51,7 @@ drso :: Adj -> RandomV -> StateV -> StateV
 drso g r s = dso g s +^ V.zipWith (*) r s
 
 drsoIterate :: Adj -> RandomV -> StateV -> Int -> [StateV]
-drsoIterate g r s n = drsoIterate' g r [s] n
+drsoIterate g r s n = s : drsoIterate' g r [s] n
   where
     drsoIterate' _ _ _ 0 = []
     drsoIterate' g r ss n = next : drsoIterate' g r (next : ss) (n-1)
