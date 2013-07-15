@@ -1,11 +1,11 @@
-module Anderson where
+module Anderson.Safe where
 
 import Data.Vector (Vector,(!))
 import qualified Data.Vector as V
 
 import Graph
 
-type Energy = Double
+type Energy = Rational
 -- newtype StateV = StateV (Vector Energy)
 type StateV = Vector Energy
 
@@ -15,7 +15,10 @@ delta g n = V.generate (numV g) (\i -> if i == n then 1 else 0)
 
 norandom g = V.replicate (numV g) 0
 
-intensity = (!)
+intensity s = (normalize s !)
+  where 
+    normalize :: StateV -> Vector Double
+    normalize v = V.map ((/ (sqrt . fromRational . l2norm2 $ v)) . fromRational) v
 
 (+^) = V.zipWith (+)
 neg = V.map negate
@@ -28,18 +31,16 @@ dotp = curry $ V.foldl' (+) 0 . uncurry (V.zipWith (*))
 l2norm2 :: StateV -> Energy
 l2norm2 = V.foldl' (+) 0 . V.map (^2)
 
--- subtractProj :: StateV -> StateV -> StateV
--- subtractProj v w = v -^ ((dotp v w / l2norm2 w) *^ w)
+subtractProj :: StateV -> StateV -> StateV
+subtractProj v w = if n2 == 0 then v else v -^ ((dotp v w / l2norm2 w) *^ w)
+  where n2 = l2norm2 w
 
-subtractProjOrth :: StateV -> StateV -> StateV
-subtractProjOrth v w = v -^ ((v `dotp` w) *^ w)
+-- subtractProjOrth :: StateV -> StateV -> StateV
+-- subtractProjOrth v w = v -^ ((v `dotp` w) *^ w)
 
-gsOrth :: [StateV] -> StateV -> StateV
-gsOrth xs s = (1 / sqrt (l2norm2 res)) *^ res
-  where 
-    res = f xs s
-    f [] s = s
-    f (x:xs) s = f xs (s `subtractProjOrth` x)
+gs :: [StateV] -> StateV -> StateV
+gs [] s = s
+gs (x:xs) s = gs xs (s `subtractProj` x)
 
 -- rewrite to avoid nested data parallelism
 dso :: Adj -> StateV -> StateV
@@ -58,9 +59,9 @@ drsoIterate g r s n = s : drsoIterate' g r [s] n
     drsoIterate' _ _ _ 0 = []
     drsoIterate' g r ss n = next : drsoIterate' g r (next : ss) (n-1)
       where 
-        next = gsOrth ss (drso g r (head ss))
+        next = gs ss (drso g r (head ss))
 
 drsoDists :: [StateV] -> StateV -> [Double]
 drsoDists [] _ = []
-drsoDists (x:xs) s = sqrt (l2norm2 normal) : drsoDists xs normal
-  where normal = subtractProjOrth s x
+drsoDists (x:xs) s = (sqrt . fromRational . l2norm2 $ normal) : drsoDists xs normal
+  where normal = subtractProj s x
