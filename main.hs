@@ -17,5 +17,5 @@ main = do
     putStrLn $ "writing " ++ show i ++ "th state"
     writeFile (fbase ++ "-" ++ show i ++ ".gv") 
       (graphvizColorShow greenred (intensity s) g)) (zip [0..] ss)
-      -- (graphvizShow (const "") g)) (zip [1..] ss)
+      -- (graphvizShow (labelBy s) g)) (zip [1..] ss)
   putStrLn "done"

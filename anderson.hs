@@ -1,7 +1,7 @@
 module Anderson where
 
-import Data.Vector (Vector,(!))
-import qualified Data.Vector as V
+import Data.Vector.Unboxed (Vector,(!))
+import qualified Data.Vector.Unboxed as V
 
 import Anderson.Random
 import Graph

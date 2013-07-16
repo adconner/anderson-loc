@@ -4,7 +4,7 @@ import Control.Monad
 import Data.List
 import Data.Maybe
 import qualified Data.List as LO
-import qualified Data.Vector as V
+import qualified Data.Vector.Unboxed as V
 
 import Graph
 

@@ -1,8 +1,8 @@
 module Graph where
 
 import Data.List
-import Data.Vector(Vector,(!))
-import qualified Data.Vector as V
+import Data.Vector.Unboxed (Vector,(!))
+import qualified Data.Vector.Unboxed as V
 
 type Node = Int
 data Adj = Adj { offset :: Vector Int,
