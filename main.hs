@@ -10,13 +10,13 @@ import Anderson
 import Anderson.Random
 import Graph
 import Graph.Gasket
-import Graph.Ring
+-- import Graph.Ring
 
 main = do 
   [fbase, ms, ns] <- getArgs
   let (m, n) = (read ms, read ns)
 
-  let g = gasketAdj $ gasketList m
+  let g = graph m
   -- let g = ring m
   
   r <- liftM (genrandom g 1) getStdGen

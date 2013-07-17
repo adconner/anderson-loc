@@ -4,7 +4,6 @@ import Data.Maybe(fromJust)
 import Data.List
 import Data.Vector.Unboxed (Vector,(!))
 import qualified Data.Vector.Unboxed as V
-
 import Numeric
 
 type Node = Int
