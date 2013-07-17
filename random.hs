@@ -11,4 +11,4 @@ type RandomV = Vector Double
 
 norandom g = V.replicate (numV g) 0
 
-genrandom gen g c = V.fromList $ take (numV g) $ randomRs (-c/2, c/2) gen 
+genrandom g c gen = V.fromList $ take (numV g) $ randomRs (-c/2, c/2) gen 

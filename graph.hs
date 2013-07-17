@@ -5,6 +5,8 @@ import Data.List
 import Data.Vector.Unboxed (Vector,(!))
 import qualified Data.Vector.Unboxed as V
 
+import Numeric
+
 type Node = Int
 data Adj = Adj { offset :: Vector Int,
                  dat :: Vector Node }
@@ -33,7 +35,11 @@ adj start g = Adj (V.fromList shape) (V.fromList dat)
     bfs (n:ns) vs = n : bfs (ns ++ ((neighbors n \\ vs) \\ ns)) (n : vs)
     neighbors n = fromJust $ lookup n g
 
-labelBy s = take 4 . show . (s V.!)
+labelBy s = flip (showFFloat (Just 2)) "" . (s V.!)
+
+intensity s = (normalize s !)
+  where 
+    normalize v = V.map (/ (V.maximum . V.map abs) v) v
 
 graphvizShow label g  = "strict graph G {" 
     ++ intercalate "\n" (map gv . V.toList . vertices $ g) ++ "\n}"
@@ -41,19 +47,20 @@ graphvizShow label g  = "strict graph G {"
     gv v = concatMap (\w -> "\n  " ++ name v ++ " -- " ++ name w) (V.toList . neighbors g $ v)
     name v = "\"" ++ show v ++ "(" ++ label v ++ ")\""
 
-grayscale i = "\"0.000 0.000 " ++ (take 5 . show . f) i ++ "\""
+grayscale i = "\"0.000 0.000 " ++ (show . f) i ++ "\""
   where f i = 1 - (i + 1)/2 
 
-hue i = "\"" ++ (take 5 . show . f) i ++ " 1.000 1.000\""
+hue i = "\"" ++ (show . f) i ++ " 1.000 1.000\""
   where f i = 1 - (i + 1)/2 
 
-greenred i | i >= 0 = "\"0.333 " ++ (take 5 . show ) i ++ " 1.000\""
-greenred i = "\"0.000 " ++ (take 5 . show . abs ) i ++ " 1.000\""
+greenred i | i >= 0 = "\"0.333 " ++ show i ++ " 1.000\""
+greenred i = "\"0.000 " ++ (show . abs) i ++ " 1.000\""
 
-graphvizColorShow color intensity g  = "strict graph G {\n  node [style=filled]\n" 
+graphvizColorShow label color intensity g  = "strict graph G {\n  node [style=filled]\n" 
     ++ intercalate "\n" (map node . V.toList . vertices $ g) ++ "\n\n"
     ++ intercalate "\n" (map gv . V.toList . vertices $ g) ++ "\n}"
   where 
-    node v = "  \"" ++ show v ++ "\" [fillcolor=" ++ color (intensity v) ++ "]"
+    node v = "  " ++ name v ++ " [fillcolor=" ++ color (intensity v) ++ "]"
     gv v = concatMap (\w -> "\n  " ++ name v ++ " -- " ++ name w) (V.toList . neighbors g $ v)
-    name v = "\"" ++ show v ++ "\""
+    name v | label v == "" = "\"" ++ show v ++ "\""
+    name v = "\"" ++ show v ++ "(" ++ label v ++ ")\""

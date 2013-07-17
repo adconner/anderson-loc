@@ -13,11 +13,6 @@ type StateV = Vector Energy
 
 delta g n = V.generate (numV g) (\i -> if i == n then 1 else 0)
 
-intensity s = (normalize s !)
-  where 
-    normalize :: StateV -> Vector Double
-    normalize v = V.map (/ l2norm v) v
-
 (+^) = V.zipWith (+)
 neg = V.map negate
 v -^ w = v +^ neg w
