@@ -63,7 +63,11 @@ drsoIterateGraham g r s = unfoldr (\ss -> Just (head ss, next ss : ss)) [s]
   where
     next ss = last $ successivegs (drso g r (head ss)) ss
 
+drsoNormals :: StateV -> Adj -> RandomV -> StateV -> [StateV]
 drsoNormals d1 g r s = successivegs d1 $ drsoIterate g r s
 
-drsoDists :: StateV -> [StateV] -> [Double]
-drsoDists = curry (map l2norm . uncurry successivegs)
+drsoDists :: StateV -> Adj -> RandomV -> StateV -> [Double]
+drsoDists = curry . curry . curry $ (map l2norm . (uncurry . uncurry . uncurry $ drsoNormals))
+
+-- dists :: StateV -> [StateV] -> [Double]
+-- dists = curry (map l2norm . uncurry successivegs)
