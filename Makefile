@@ -1,6 +1,6 @@
 GHCOPTS=
 files = $(wildcard *.hs)
-pictures = $(patsubst %.gv, %.png, $(wildcard *.gv))
+pictures = $(patsubst %.gv, %.png, $(wildcard pics/*.gv))
 
 all: anderson
 
