@@ -23,8 +23,8 @@ degree g v = V.length (dat g) - offset g ! v
 neighbors :: Adj -> Node -> Vector Node
 neighbors g v = V.slice (offset g ! v) (degree g v) (dat g)
 
-adj :: Eq a => [(a,[a])] -> a -> Adj
-adj g start = Adj (V.fromList shape) (V.fromList dat)
+adj :: Eq a => a -> [(a,[a])] -> Adj
+adj start g = Adj (V.fromList shape) (V.fromList dat)
   where
     shape = init $ scanl (+) 0 $ map (length . neighbors) order
     dat = concatMap (sort . map (fromJust . flip findIndex order . (==)) . neighbors) order

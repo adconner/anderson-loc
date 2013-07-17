@@ -81,7 +81,7 @@ adjacencylistShow g = intercalate "\n" (map al ns)
     ns = compile g
     al (v, r) = show v ++ ": " ++ intercalate ", " (map show r)
 
-gasketAdj g = adj (nodes g) (top g)
+gasketAdj g = adj (top g) (nodes g)
 -- Adj (V.fromList shape) (V.fromList dat)
 --   where
 --     shape = init $ scanl (+) 0 $ map (length . neighbors) order
