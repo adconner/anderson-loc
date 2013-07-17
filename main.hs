@@ -7,12 +7,14 @@ import Anderson
 import Anderson.Random
 import Graph
 import Graph.Gasket
+import Graph.Ring
 
 main = do 
   [fbase, ms, ns] <- getArgs
   let (m, n) = (read ms, read ns)
   let g = gasketAdj $ gasketList m
-  let ss = take n $ drsoIterate g (norandom g) (delta g 0)
+  -- let g = ring m
+  let ss = take n $ drsoIterateGraham g (norandom g) (delta g 0)
   mapM_ (\(i,s) -> do 
     putStrLn $ "writing " ++ show i ++ "th state"
     writeFile (fbase ++ "-" ++ show i ++ ".gv") 
