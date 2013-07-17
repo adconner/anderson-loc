@@ -21,7 +21,7 @@ main = do
   
   r <- liftM (genrandom g 1) getStdGen
 
-  let ss = take n $ drsoIterateGraham g r (delta g 0)
+  let ss = take (n+1) $ drsoIterateGraham g r (delta g 0)
   -- let ss = take n $ drsoIterate g r (delta g 0)
   mapM_ (\(i,s) -> do 
     putStrLn $ "writing " ++ show i ++ "th state"
