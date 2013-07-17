@@ -81,14 +81,15 @@ adjacencylistShow g = intercalate "\n" (map al ns)
     ns = compile g
     al (v, r) = show v ++ ": " ++ intercalate ", " (map show r)
 
-gasketAdj g = Adj (V.fromList shape) (V.fromList dat)
-  where
-    shape = init $ scanl (+) 0 $ map (length . neighbors) order
-    dat = concatMap (sort . map (fromJust . flip findIndex order . (==)) . neighbors) order
-    order = bfs [top g] []
-    bfs [] _ = []
-    bfs (n:ns) vs = n : bfs (ns ++ ((neighbors n \\ vs) \\ ns)) (n : vs)
-    neighbors n = fromJust $ lookup n $ nodes g
+gasketAdj g = adj (nodes g) (top g)
+-- Adj (V.fromList shape) (V.fromList dat)
+--   where
+--     shape = init $ scanl (+) 0 $ map (length . neighbors) order
+--     dat = concatMap (sort . map (fromJust . flip findIndex order . (==)) . neighbors) order
+--     order = bfs [top g] []
+--     bfs [] _ = []
+--     bfs (n:ns) vs = n : bfs (ns ++ ((neighbors n \\ vs) \\ ns)) (n : vs)
+--     neighbors n = fromJust $ lookup n $ nodes g
     -- bfs (n:ns) vs cur = n : bfs (ns ++ (neighbors n \\ vs)) (n : vs) (cur + 1)
 
 -- main = do 

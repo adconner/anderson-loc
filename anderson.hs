@@ -54,11 +54,10 @@ drso g r s = dso g s +^ V.zipWith (*) r s
 drsoIterate :: Adj -> RandomV -> StateV -> [StateV]
 drsoIterate g r = iterate (drso g r)
 
-drsoIterateGraham :: Adj -> RandomV -> StateV -> Int -> [StateV]
-drsoIterateGraham g r s n = s : drsoIterate' g r [s] n
+drsoIterateGraham :: Adj -> RandomV -> StateV -> [StateV]
+drsoIterateGraham g r s = s : drsoIterate' g r [s]
   where
-    drsoIterate' _ _ _ 0 = []
-    drsoIterate' g r ss n = next : drsoIterate' g r (next : ss) (n-1)
+    drsoIterate' g r ss = next : drsoIterate' g r (next : ss)
       where 
         next = grahamschmidt ss (drso g r (head ss))
 
