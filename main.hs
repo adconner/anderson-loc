@@ -8,7 +8,8 @@ import System.Random
 import Numeric
 
 -- import Anderson
-import Anderson.Norm
+-- import Anderson.Norm
+import Anderson.Graham
 import Anderson.Random
 import Graph
 import Graph.Gasket
