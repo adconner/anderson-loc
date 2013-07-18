@@ -1,4 +1,4 @@
-module Anderson where
+module Anderson.Norm where
 
 import Data.List(unfoldr)
 import Data.Vector.Unboxed (Vector,(!))
@@ -27,13 +27,12 @@ l2norm2 = V.foldl' (+) 0 . V.map (^2)
 l2norm :: StateV -> Energy
 l2norm = sqrt . l2norm2
 
+normalize v = V.map (/ l2norm v) v
+
 subtractProj :: StateV -> StateV -> StateV
 subtractProj v w = if l2norm2 w < 0.001 
                     then error $ "tried to subtract the projection onto short vector " ++ show w 
-                    else v -^ ((dotp v w / l2norm2 w) *^ w)
-
--- subtractProjOrth :: StateV -> StateV -> StateV
--- subtractProjOrth v w = v -^ ((v `dotp` w) *^ w)
+                    else v -^ (dotp v w *^ w)
 
 successivegs :: StateV -> [StateV] -> [StateV]
 successivegs = scanl subtractProj
@@ -48,7 +47,7 @@ dsoSimp :: Adj -> StateV -> StateV
 dsoSimp g s = V.imap (\n e -> V.sum (V.map (s !) (neighbors g n))) s
 
 drso :: Adj -> RandomV -> StateV -> StateV
-drso g r s = dso g s +^ V.zipWith (*) r s
+drso g r s = normalize $ dso g s +^ V.zipWith (*) r s
 
 drsoIterate :: Adj -> RandomV -> StateV -> [StateV]
 drsoIterate g r = iterate (drso g r)
@@ -64,6 +63,3 @@ drsoNormals d1 g r s = successivegs d1 $ drsoIterate g r s
 
 drsoDists :: StateV -> Adj -> RandomV -> StateV -> [Double]
 drsoDists = curry . curry . curry $ (map l2norm . (uncurry . uncurry . uncurry $ drsoNormals))
-
--- dists :: StateV -> [StateV] -> [Double]
--- dists = curry (map l2norm . uncurry successivegs)
