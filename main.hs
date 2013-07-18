@@ -1,31 +1,27 @@
-module Main where
+module Main.Anderson where
 
 import Control.Monad
 
 import System.Environment
 import System.IO
 import System.Random
+import Numeric
 
-import Anderson
+-- import Anderson
+import Anderson.Norm
 import Anderson.Random
 import Graph
 import Graph.Gasket
 -- import Graph.Ring
 
 main = do 
-  [fbase, ms, ns] <- getArgs
-  let (m, n) = (read ms, read ns)
+  [ms, ns, cs, d0s, d1s] <- getArgs
+  let (m, n, c, d0, d1) = (read ms, read ns, read cs, read d0s, read d1s)
 
   let g = graph m
-  -- let g = ring m
   
-  r <- liftM (genrandom g 1) getStdGen
+  r <- liftM (genrandom g c) getStdGen
 
-  let ss = take (n+1) $ drsoIterateGraham g r (delta g 0)
-  -- let ss = take n $ drsoIterate g r (delta g 0)
-  mapM_ (\(i,s) -> do 
-    putStrLn $ "writing " ++ show i ++ "th state"
-    writeFile (fbase ++ "-" ++ show i ++ ".gv") 
-      (graphvizColorShow (labelBy r) greenred (intensity s) g)) (zip [0..] ss)
-      -- (graphvizShow (labelBy s) g)) (zip [0..] ss)
-  putStrLn "done"
+  let dists = take (n+1) $ drsoDists (delta g d1) g r (delta g d0)
+  
+  mapM_ (\(n, d) -> putStrLn $ show n ++ " " ++ showFFloat (Just 16) d "") $ zip [0..] dists
