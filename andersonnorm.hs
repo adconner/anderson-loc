@@ -37,21 +37,22 @@ subtractProj v w = if l2norm2 w < 0.001
 successivegs :: StateV -> [StateV] -> [StateV]
 successivegs = scanl subtractProj
 
--- rewrite to avoid nested data parallelism
 dso :: Adj -> StateV -> StateV
 dso g s = s +^ V.imap (\n e -> 
--- dso g s = V.imap (\n e -> 
   V.sum (V.map (s !) (neighbors g n)) - fromIntegral (degree g n) * e) s
 
 drso :: Adj -> RandomV -> StateV -> StateV
 drso g r s = normalize $ dso g s +^ V.zipWith (*) r s
 
-drsoIterate :: Adj -> RandomV -> StateV -> [StateV]
-drsoIterate g r = iterate (drso g r)
+drsoIterateGraham :: Int -> Adj -> RandomV -> StateV -> [StateV]
+drsoIterateGraham ntosub g r s = unfoldr (\ss -> Just (head ss, next ss : ss)) [s]
+  where
+    next ss = last $ successivegs (drso g r (head ss)) $ take ntosub ss
 
 -- todo investigate numerical issues here
-drsoNormals :: StateV -> Adj -> RandomV -> StateV -> [StateV]
-drsoNormals d1 g r s = successivegs d1 $ drsoIterate g r s
+drsoNormals :: Int -> StateV -> Adj -> RandomV -> StateV -> [StateV]
+drsoNormals ntosub d1 g r s = successivegs d1 $ drsoIterateGraham ntosub g r s
 
-drsoDists :: StateV -> Adj -> RandomV -> StateV -> [Double]
-drsoDists = curry . curry . curry $ (map l2norm . (uncurry . uncurry . uncurry $ drsoNormals))
+drsoDists :: Int -> StateV -> Adj -> RandomV -> StateV -> [Double]
+drsoDists = curry . curry . curry . curry $ (map l2norm . 
+            (uncurry . uncurry . uncurry . uncurry $ drsoNormals))

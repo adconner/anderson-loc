@@ -1,7 +1,7 @@
 main=anderson
 
 draw=draw
-m=4
+m=5
 n=30
 
 GHCOPTS=

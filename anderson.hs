@@ -29,7 +29,7 @@ l2norm = sqrt . l2norm2
 
 subtractProj :: StateV -> StateV -> StateV
 subtractProj v w = if l2norm2 w < 0.001 
-                    then error $ "tried to subtract the projection onto short vector " ++ show w 
+                    then error $ "tried to subtract the projection onto short vector"
                     else v -^ ((dotp v w / l2norm2 w) *^ w)
 
 -- subtractProjOrth :: StateV -> StateV -> StateV
@@ -43,9 +43,6 @@ dso :: Adj -> StateV -> StateV
 dso g s = s +^ V.imap (\n e -> 
 -- dso g s = V.imap (\n e -> 
   V.sum (V.map (s !) (neighbors g n)) - fromIntegral (degree g n) * e) s
-
-dsoSimp :: Adj -> StateV -> StateV
-dsoSimp g s = V.imap (\n e -> V.sum (V.map (s !) (neighbors g n))) s
 
 drso :: Adj -> RandomV -> StateV -> StateV
 drso g r s = dso g s +^ V.zipWith (*) r s
@@ -62,8 +59,8 @@ drsoIterateGraham g r s = unfoldr (\ss -> Just (head ss, next ss : ss)) [s]
 drsoNormals :: StateV -> Adj -> RandomV -> StateV -> [StateV]
 drsoNormals d1 g r s = successivegs d1 $ drsoIterate g r s
 
-drsoDists :: StateV -> Adj -> RandomV -> StateV -> [Double]
-drsoDists = curry . curry . curry $ (map l2norm . (uncurry . uncurry . uncurry $ drsoNormals))
+drsoDists :: Int -> StateV -> Adj -> RandomV -> StateV -> [Double]
+drsoDists _ = curry . curry . curry $ (map l2norm . (uncurry . uncurry . uncurry $ drsoNormals))
 
 -- dists :: StateV -> [StateV] -> [Double]
 -- dists = curry (map l2norm . uncurry successivegs)
