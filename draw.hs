@@ -31,7 +31,7 @@ defaults = Options {
   c = 0,
   mode = Iterates,
   rend = Color,
-  file = "graph"
+  file = "pics/graph"
 }
 
 render :: Options -> IO ()
@@ -47,9 +47,12 @@ render opts = do
     Differences d1 -> take (n opts + 1) $ drsoNormals (ntosub opts) (delta g d1) g r (delta g (d0 opts))
   }
 
+  let padTo = length $ show (n opts)
+
   mapM_ (\(i,s) -> do 
     putStrLn $ "writing " ++ show i ++ "th state"
-    writeFile (file opts ++ "-" ++ show i ++ ".gv") $
+    let is = show i
+    writeFile (file opts ++ "-" ++ replicate (padTo - length is) '0' ++ is ++ ".gv") $
       case rend opts of
         Color -> (graphvizColorShow (labelBy r) greenred (intensity s) g)
         Label -> (graphvizShow (labelBy s) g)) 

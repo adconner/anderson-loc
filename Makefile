@@ -1,14 +1,15 @@
 main=anderson
 
 draw=draw
-m=5
 n=30
+m=5
 
 GHCOPTS=
 
 files = $(wildcard *.hs)
-# pictures = $(patsubst %.gv, %.png, $(wildcard pics/*.gv))
-pictures = $(shell for i in $$(seq 0 $n); do echo pics/graph-$$i.png; done)
+pictures = $(sort $(patsubst %.gv, %.png, $(wildcard pics/*.gv)))
+autopictures = $(shell for i in $$(seq 0 $n); do echo pics/graph-$$i.png; done)
+# pictures = $(patsubst %.gz,%.png,$(wildcard pics/*.gz))
 
 all: $(main)
 
@@ -22,9 +23,17 @@ pics: $(pictures)
 
 show: pics
 	sxiv $(pictures)
+	
+apics: $(autopictures)
 
-$(patsubst %.png,%.gv,$(pictures)): $(draw)
-	./$(draw) --fbase=pics/graph -m$m -n$n
+ashow: apics
+	sxiv $(autopictures)
+
+$(patsubst %.png,%.gv,$(autopictures)): $(draw)
+	./$(draw) --fbase=pics/graph -n$n -m$m
 
 %.png: %.gv
 	neato -Tpng -o $@ $<
+
+clean: 
+	rm -f *.o *.hi pics/*
