@@ -24,7 +24,7 @@ show: pics
 	sxiv $(pictures)
 
 $(patsubst %.png,%.gv,$(pictures)): $(draw)
-	./$(draw) pics/graph $m $n
+	./$(draw) --fbase=pics/graph -m$m -n$n
 
 %.png: %.gv
 	neato -Tpng -o $@ $<

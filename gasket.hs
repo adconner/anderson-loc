@@ -83,4 +83,5 @@ adjacencylistShow g = intercalate "\n" (map al ns)
 
 gasketAdj g = adj (top g) (nodes g)
 
+graph :: Int -> Adj
 graph = gasketAdj . gasketList
