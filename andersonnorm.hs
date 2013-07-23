@@ -52,7 +52,3 @@ drsoIterateGraham ntosub g r s = unfoldr (\ss -> Just (head ss, next ss : ss)) [
 -- todo investigate numerical issues here
 drsoNormals :: Int -> StateV -> Adj -> RandomV -> StateV -> [StateV]
 drsoNormals ntosub d1 g r s = successivegs d1 $ drsoIterateGraham ntosub g r s
-
-drsoDists :: Int -> StateV -> Adj -> RandomV -> StateV -> [Double]
-drsoDists = curry . curry . curry . curry $ (map l2norm . 
-            (uncurry . uncurry . uncurry . uncurry $ drsoNormals))
