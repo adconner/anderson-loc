@@ -35,7 +35,7 @@ subtractProj :: StateV -> StateV -> StateV
 subtractProj v w = if wn2 < 0.001 
                     then error $ "tried to subtract the projection onto short vector " ++ show w 
                     else v -^ ((dotp v w / wn2) *^ w)
-  where wn2 = l2norm w
+  where wn2 = l2norm2 w
 
 successivegs :: StateV -> [StateV] -> [StateV]
 successivegs = scanl subtractProj
