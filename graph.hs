@@ -35,7 +35,10 @@ adj start g = Adj (V.fromList shape) (V.fromList dat)
     neighbors n = delete n $ concat (maybe [] (:[]) (lookup n g))
                       `union` [i | (i,l) <- g, n `elem` l]
 
+-- labelBy s = (\ d -> if d == 0 then "" else showFFloat (Just 2) d "") . (s V.!)
 labelBy s = flip (showFFloat (Just 2)) "" . (s V.!)
+
+empty = const ""
 
 intensity s = (normalize s !)
   where 
@@ -60,7 +63,5 @@ graphvizColorShow label color intensity g  = "strict graph G {\n  node [style=fi
     ++ intercalate "\n" (map node . V.toList . vertices $ g) ++ "\n\n"
     ++ intercalate "\n" (map gv . V.toList . vertices $ g) ++ "\n}"
   where 
-    node v = "  " ++ name v ++ " [fillcolor=" ++ color (intensity v) ++ "]"
-    gv v = concatMap (\w -> "\n  " ++ name v ++ " -- " ++ name w) (V.toList . neighbors g $ v)
-    name v | label v == "" = "\"" ++ show v ++ "\""
-    name v = "\"" ++ show v ++ "(" ++ label v ++ ")\""
+    node v = "  " ++ show v ++ " [fillcolor=" ++ color (intensity v) ++ ", label=\"" ++ label v ++ "\"]"
+    gv v = concatMap (\w -> "\n  " ++ show v ++ " -- " ++ show w) (V.toList . neighbors g $ v)
