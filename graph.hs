@@ -1,6 +1,5 @@
 module Graph where
 
-import Data.Maybe(fromJust)
 import Data.List
 import Data.Vector.Unboxed (Vector,(!))
 import qualified Data.Vector.Unboxed as V
@@ -28,11 +27,13 @@ adj :: Eq a => a -> [(a,[a])] -> Adj
 adj start g = Adj (V.fromList shape) (V.fromList dat)
   where
     shape = init $ scanl (+) 0 $ map (length . neighbors) order
-    dat = concatMap (sort . map (fromJust . flip findIndex order . (==)) . neighbors) order
+    dat = concatMap (sort . map (maybe (error "Graph.adj: vertex not ordered") id
+      . flip findIndex order . (==)) . neighbors) order
     order = bfs [start] []
     bfs [] _ = []
     bfs (n:ns) vs = n : bfs (ns ++ ((neighbors n \\ vs) \\ ns)) (n : vs)
-    neighbors n = fromJust $ lookup n g
+    neighbors n = delete n $ concat (maybe [] (:[]) (lookup n g))
+                      `union` [i | (i,l) <- g, n `elem` l]
 
 labelBy s = flip (showFFloat (Just 2)) "" . (s V.!)
 
