@@ -5,13 +5,14 @@ import Data.List
 import Data.Vector.Unboxed (Vector,(!))
 import qualified Data.Vector.Unboxed as V
 import Test.QuickCheck
+import qualified Test.QuickCheck.Property as P
 import System.Random
 
 import Graph
 import Anderson.Random
 import Anderson.Norm
 
-size = 100
+size = 10
 thresh :: Fractional a => a
 thresh = 0.001
 
@@ -32,7 +33,14 @@ eq a b = abs (a - b) < thresh
 nullS :: StateV -> Bool
 nullS v = l2norm2 v < thresh
 
-notNullS = not . nullS
+eqSR :: StateV -> StateV -> P.Result
+eqSR v w = if eqS v w then P.succeeded else P.failed {P.reason = show v ++ " \\= " ++ show w}
+
+eqR :: (Show a, Ord a, Fractional a) => a -> a -> P.Result
+eqR a b = if eq a b then P.succeeded else P.failed {P.reason = show a ++ " \\= " ++ show b}
+
+nullSR :: StateV -> P.Result
+nullSR v = if l2norm2 v < thresh then P.succeeded else P.failed {P.reason = show v ++ " not null"}
 
 inSubspace :: StateV -> [StateV] -> Bool
 inSubspace = curry (nullS . last . uncurry successivegs)
@@ -40,21 +48,32 @@ inSubspace = curry (nullS . last . uncurry successivegs)
 subspaceSubset :: [StateV] -> [StateV] -> Bool
 subspaceSubset ss ss' = all (flip inSubspace ss') ss
 
-prop_null :: StateV -> Bool
-prop_null v = nullS (v -^ v)
+inSubspaceR :: StateV -> [StateV] -> P.Result
+inSubspaceR s ss = if inSubspace s ss then P.succeeded else 
+  P.failed {P.reason = show s ++ " not in subspace " ++ show ss}
+
+subspaceSubsetR :: [StateV] -> [StateV] -> Property
+subspaceSubsetR ss ss' = foldr1 (.&&.) $ map (property . flip inSubspaceR ss') ss
+
+prop_null :: StateV -> P.Result
+prop_null v = nullSR (v -^ v)
+
+prop_small g i = do 
+  a <- choose (-thresh/2, thresh/2)
+  property $ nullSR (a *^ delta g i)
 
 prop_subSelf :: StateV -> Property
-prop_subSelf v = notNullS v ==> nullS (subtractProj v v)
+prop_subSelf v = not (nullS v) ==> nullSR (subtractProj v v)
 
 prop_subOther :: StateV -> StateV -> Double -> Property
-prop_subOther v w a = notNullS w ==> (subtractProj (v +^ (a *^ w)) w 
-                                         `eqS` subtractProj v w)
+prop_subOther v w a = not (nullS w) ==> (subtractProj (v +^ (a *^ w)) w 
+                                         `eqSR` subtractProj v w)
 
 prop_orth :: StateV -> StateV -> Property
-prop_orth v w = notNullS w ==> eq 0 (subtractProj v w `dotp` w)
+prop_orth v w = not (nullS w) ==> eqR 0 (subtractProj v w `dotp` w)
 
-prop_normalize :: StateV -> Bool
-prop_normalize = eq 1 . l2norm2 . normalize
+prop_normalize :: StateV -> P.Result
+prop_normalize = eqR 1 . l2norm2 . normalize
 
 prop_inOwn :: StateV -> Gen Bool
 prop_inOwn s = do 
@@ -73,11 +92,11 @@ prop_oldInGs = do
   let ss' = map (\ (x:xs) -> last (successivegs x xs)) $ init (tails ss)
   return $ subspaceSubset ss ss' 
 
-prop_drsoLinConstant :: Adj -> RandomV -> Double -> StateV -> Bool
-prop_drsoLinConstant g r a v = drso g r (a *^ v) `eqS` (a *^ drso g r v)
+prop_drsoLinConstant :: Adj -> RandomV -> Double -> StateV -> P.Result
+prop_drsoLinConstant g r a v = drso g r (a *^ v) `eqSR` (a *^ drso g r v)
 
-prop_drsoLinSum :: Adj -> RandomV -> StateV -> StateV -> Bool
-prop_drsoLinSum g r v w = drso g r (v +^ w) `eqS` (drso g r v +^ drso g r w)
+prop_drsoLinSum :: Adj -> RandomV -> StateV -> StateV -> P.Result
+prop_drsoLinSum g r v w = drso g r (v +^ w) `eqSR` (drso g r v +^ drso g r w)
 
 prop_drsoNoneSubGs :: Int -> Adj -> RandomV -> StateV -> Bool
 prop_drsoNoneSubGs ntosub g r s = subspaceSubset (drsoIterateGraham 0 g r s) 
