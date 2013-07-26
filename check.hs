@@ -24,6 +24,9 @@ instance Arbitrary Adj where
   arbitrary = liftM (adj 0 . zip [0..size-1]) $ vectorOf size $ listOf1 $ choose (0,size-1)
   shrink g = [] -- better?
 
+prop_arb1 s = V.length s == size
+prop_arb2 g = numV g == size
+
 eqS :: StateV -> StateV -> Bool
 eqS v w = l2norm2 (v -^ w) < thresh
 
@@ -75,22 +78,16 @@ prop_orth v w = not (nullS w) ==> eqR 0 (subtractProj v w `dotp` w)
 prop_normalize :: StateV -> P.Result
 prop_normalize = eqR 1 . l2norm2 . normalize
 
-prop_inOwn :: StateV -> Gen Bool
-prop_inOwn s = do 
-  l <- arbitrary
-  r <- arbitrary
-  return $ inSubspace s (l ++ [s] ++ r)
+prop_inOwn :: StateV -> [StateV] -> [StateV] -> Property
+prop_inOwn s l r = not (nullS s) && (all (not . nullS) l) && (all (not . nullS) r) 
+  ==> inSubspace s (l ++ [s] ++ r)
 
 -- prop_inGs :: 
-prop_gsInOld = do 
-  ss <- arbitrary
-  let ss' = map (\ (x:xs) -> last (successivegs x xs)) $ init (tails ss)
-  return $ subspaceSubset ss' ss
+prop_gsInOld ss = not (null ss) ==> subspaceSubsetR ss' ss
+  where ss' = map (\ (x:xs) -> last (successivegs x xs)) $ init (tails ss)
 
-prop_oldInGs = do 
-  ss <- arbitrary
-  let ss' = map (\ (x:xs) -> last (successivegs x xs)) $ init (tails ss)
-  return $ subspaceSubset ss ss' 
+prop_oldInGs ss = not (null ss) ==> subspaceSubsetR ss ss'
+  where ss' = map (\ (x:xs) -> last (successivegs x xs)) $ init (tails ss)
 
 prop_drsoLinConstant :: Adj -> RandomV -> Double -> StateV -> P.Result
 prop_drsoLinConstant g r a v = drso g r (a *^ v) `eqSR` (a *^ drso g r v)

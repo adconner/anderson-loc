@@ -30,10 +30,13 @@ adj start g = Adj (V.fromList shape) (V.fromList dat)
     dat = concatMap (sort . map (maybe (error "Graph.adj: vertex not ordered") id
       . flip findIndex order . (==)) . neighbors) order
     order = bfs [start] []
-    bfs [] _ = []
+    bfs [] vs | null rem = []
+              | otherwise = bfs [head rem] vs
+      where rem = vertices \\ vs 
     bfs (n:ns) vs = n : bfs (ns ++ ((neighbors n \\ vs) \\ ns)) (n : vs)
-    neighbors n = delete n $ concat (maybe [] (:[]) (lookup n g))
+    neighbors n = delete n $ (nub . filter (`elem` vertices) . maybe (error "no vertex") id $ lookup n g)
                       `union` [i | (i,l) <- g, n `elem` l]
+    vertices = map fst g
 
 -- labelBy s = (\ d -> if d == 0 then "" else showFFloat (Just 2) d "") . (s V.!)
 labelBy s = flip (showFFloat (Just 2)) "" . (s V.!)
